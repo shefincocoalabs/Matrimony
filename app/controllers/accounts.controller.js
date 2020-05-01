@@ -199,4 +199,41 @@ exports.verifyOtp = async (req, res) => {
       message: err.message
     })
   }
+};
+
+exports.setLogin = (req, res) => {
+  var email = req.body.email;
+  var password = req.body.password;
+  var confirmPassword = req.body.confirmPassword;
+  if (!email || !password || !confirmPassword) {
+    var errors = [];
+    if (!email) {
+      errors.push({
+        field: "email",
+        message: "Email cannot be empty"
+      });
+    }
+    if (!password) {
+      errors.push({
+        field: "password",
+        message: "Password cannot be empty"
+      });
+    }
+    if (!confirmPassword) {
+      errors.push({
+        field: "confirmPassword",
+        message: "ConfirmPassword cannot be empty"
+      });
+    }
+    return res.status(400).send({
+      success: 0,
+      errors: errors,
+    });
+  };
+  if (password != confirmPassword) {
+    return res.status(400).send({
+      success: 0,
+      message: 'Password and confirrm password fields should be same'
+    })
+  };
 }

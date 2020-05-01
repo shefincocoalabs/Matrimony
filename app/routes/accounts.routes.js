@@ -16,6 +16,7 @@ module.exports = (app) => {
     app.post('/accounts/sign-up', accounts.signUp);
     app.get('/accounts/profile-for',accounts.profileFor);
     app.post('/accounts/verify-otp',accounts.verifyOtp);
+    app.post('/accounts/set-login',accounts.setLogin);
 };
 
 
