@@ -51,9 +51,8 @@ exports.signUp = async (req, res) => {
         message: "Phone cannot be empty"
       });
     }
-    return res.send({
+    return res.status(400).send({
       success: 0,
-      statusCode: 400,
       errors: errors,
     });
   };
@@ -132,9 +131,8 @@ exports.verifyOtp = async (req, res) => {
         message: "Userdetails cannot be empty"
       });
     }
-    return res.send({
+    return res.status(400).send({
       success: 0,
-      statusCode: 400,
       errors: errors,
     });
   };
@@ -143,56 +141,62 @@ exports.verifyOtp = async (req, res) => {
     apiToken: apiToken,
     isUsed: false
   }
-  var otpData = await Otp.findOne(findCriteria);
-  if (otpData) {
-    let currentTime = Date.now();
+  try {
+    var otpData = await Otp.findOne(findCriteria);
+    if (otpData) {
+      let currentTime = Date.now();
 
-    var otpData1 = await Otp.findOne({
-      userToken: otp,
-      apiToken: apiToken,
-      isUsed: false,
-      expiry: {
-        $gt: currentTime
-      }
-    });
-    if (otpData1 === null) {
-      return res.send({
-        success: 0,
-        message: 'otp expired,please resend otp to get a new one'
-      })
-    } else {
-      var filter = {
+      var otpData1 = await Otp.findOne({
         userToken: otp,
-        apiToken: apiToken
-      };
-      var update = {
-        isUsed: true
-      };
-      let updateOtpData = await Otp.findOneAndUpdate(filter, update, {
-        new: true,
-        useFindAndModify: false
+        apiToken: apiToken,
+        isUsed: false,
+        expiry: {
+          $gt: currentTime
+        }
       });
-      if (updateOtpData) {
-        const newRegistration = new Users({
-          profileFor: userDetails.profileFor,
-          fullName: userDetails.fullName,
-          phone: userDetails.phone,
-          status: 1,
-          tsCreatedAt: Date.now(),
-          tsModifiedAt: null
+      if (otpData1 === null) {
+        return res.status(400).send({
+          success: 0,
+          message: 'otp expired,please resend otp to get a new one'
+        })
+      } else {
+        var filter = {
+          userToken: otp,
+          apiToken: apiToken
+        };
+        var update = {
+          isUsed: true
+        };
+        let updateOtpData = await Otp.findOneAndUpdate(filter, update, {
+          new: true,
+          useFindAndModify: false
         });
-        let saveRegistration = await newRegistration.save();
+        if (updateOtpData) {
+          const newRegistration = new Users({
+            profileFor: userDetails.profileFor,
+            fullName: userDetails.fullName,
+            phone: userDetails.phone,
+            status: 1,
+            tsCreatedAt: Date.now(),
+            tsModifiedAt: null
+          });
+          let saveRegistration = await newRegistration.save();
+        }
+        res.status(200).send({
+          success: 1,
+          message: 'Otp verified and resgistered successfully'
+        })
       }
-      res.send({
-        success: 1,
-        statusCode: 200,
-        message: 'Otp verified and resgistered successfully'
+    } else {
+      return res.status(400).send({
+        success: 0,
+        message: 'Otp does not matching'
       })
     }
-  } else {
-    return res.send({
+  } catch (err) {
+    res.status(500).send({
       success: 0,
-      message: 'Otp does not matching'
+      message: err.message
     })
   }
 }
