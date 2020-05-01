@@ -14,7 +14,6 @@ var userImageUpload = multer({ storage: storage });
 module.exports = (app) => {
     const accounts = require('../controllers/accounts.controller.js');
     app.post('/accounts/sign-up', accounts.signUp);
-    app.post('/accounts/login', accounts.login);
 };
 
 

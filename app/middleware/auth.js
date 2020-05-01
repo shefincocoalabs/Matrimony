@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user.model.js');
-var config = require('../../config/app.config.js');
-const JWT_KEY = config.jwt.key;
+const paramsConfig = require('../../config/params.config');
+const JWT_KEY = paramsConfig.development.jwt.secret;
 
 const auth = async(req, res, next) => {   
     try {
